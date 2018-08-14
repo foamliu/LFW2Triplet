@@ -113,4 +113,4 @@ if __name__ == "__main__":
     import json
 
     with open('lfw_val_triplets.json', 'w') as file:
-        json.dump(triplets, file)
+        json.dump(triplets, file, indent=4)
