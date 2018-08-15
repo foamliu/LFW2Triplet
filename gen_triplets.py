@@ -4,6 +4,7 @@ if __name__ == "__main__":
         lines = file.readlines()
 
     pairs = []
+    used = set()
     for i in range(1, len(lines)):
         line = lines[i]
         tokens = line.split()
@@ -11,15 +12,13 @@ if __name__ == "__main__":
             name = tokens[0]
             id1 = int(tokens[1])
             id2 = int(tokens[2])
-            pairs.append({'name1': name, 'id1': id1, 'used1': False, 'name2': name, 'id2': id2, 'used2': False,
-                          'same_person': True})
+            pairs.append({'name1': name, 'id1': id1, 'name2': name, 'id2': id2, 'same_person': True})
         elif len(tokens) == 4:
             name1 = tokens[0]
             id1 = int(tokens[1])
             name2 = tokens[2]
             id2 = int(tokens[3])
-            pairs.append({'name1': name1, 'id1': id1, 'used1': False, 'name2': name2, 'id2': id2, 'used2': False,
-                          'same_person': False})
+            pairs.append({'name1': name1, 'id1': id1, 'name2': name2, 'id2': id2, 'same_person': False})
 
     triplets_raw = []
     same = [p for p in pairs if p['same_person']]
@@ -27,77 +26,99 @@ if __name__ == "__main__":
     for p in same:
         a_name = p['name1']
         a_id = p['id1']
-        left_match = [np for np in not_same if np['name1'] == a_name and np['id1'] == a_id and not np['used1']]
+        p_name = p['name2']
+        p_id = p['id2']
+        left_match = [np for np in not_same if
+                      np['name1'] == a_name and np['id1'] == a_id and np['name1'] not in used and np[
+                          'name2'] not in used]
         if len(left_match) > 0:
             np = left_match[0]
-            p['used1'] = True
-            p['used2'] = True
-            np['used1'] = True
-            np['used2'] = True
+            used.add(a_name)
+            used.add(p_name)
+            used.add(np['name1'])
+            used.add(np['name2'])
             triplets_raw.append(
-                {'a_name': a_name, 'a_id': a_id, 'p_name': p['name2'], 'p_id': p['id2'], 'n_name': np['name2'],
+                {'a_name': a_name, 'a_id': a_id, 'p_name': p_name, 'p_id': p_id, 'n_name': np['name2'],
                  'n_id': np['id2']})
             continue
 
-        right_match = [np for np in not_same if np['name2'] == a_name and np['id2'] == a_id and not np['used2']]
+        right_match = [np for np in not_same if
+                       np['name2'] == a_name and np['id2'] == a_id and np['name1'] not in used and np[
+                           'name2'] not in used]
         if len(right_match) > 0:
             np = right_match[0]
-            p['used1'] = True
-            p['used2'] = True
-            np['used1'] = True
-            np['used2'] = True
+            used.add(a_name)
+            used.add(p_name)
+            used.add(np['name1'])
+            used.add(np['name2'])
             triplets_raw.append(
-                {'a_name': a_name, 'a_id': a_id, 'p_name': p['name2'], 'p_id': p['id2'], 'n_name': np['name1'],
+                {'a_name': a_name, 'a_id': a_id, 'p_name': p_name, 'p_id': p_id, 'n_name': np['name1'],
                  'n_id': np['id1']})
             continue
 
         a_name = p['name2']
         a_id = p['id2']
-        left_match = [np for np in not_same if np['name1'] == a_name and np['id1'] == a_id and not np['used1']]
+        p_name = p['name1']
+        p_id = p['id1']
+        left_match = [np for np in not_same if
+                      np['name1'] == a_name and np['id1'] == a_id and np['name1'] not in used and np[
+                          'name2'] not in used]
         if len(left_match) > 0:
             np = left_match[0]
-            p['used1'] = True
-            p['used2'] = True
-            np['used1'] = True
-            np['used2'] = True
+            used.add(a_name)
+            used.add(p_name)
+            used.add(np['name1'])
+            used.add(np['name2'])
             triplets_raw.append(
-                {'a_name': a_name, 'a_id': a_id, 'p_name': p['name1'], 'p_id': p['id1'], 'n_name': np['name2'],
+                {'a_name': a_name, 'a_id': a_id, 'p_name': p_name, 'p_id': p_id, 'n_name': np['name2'],
                  'n_id': np['id2']})
             continue
 
-        right_match = [np for np in not_same if np['name2'] == a_name and np['id2'] == a_id and not np['used2']]
+        right_match = [np for np in not_same if
+                       np['name2'] == a_name and np['id2'] == a_id and np['name1'] not in used and np[
+                           'name2'] not in used]
         if len(right_match) > 0:
             np = right_match[0]
-            p['used1'] = True
-            p['used2'] = True
-            np['used1'] = True
-            np['used2'] = True
+            used.add(a_name)
+            used.add(p_name)
+            used.add(np['name1'])
+            used.add(np['name2'])
             triplets_raw.append(
-                {'a_name': a_name, 'a_id': a_id, 'p_name': p['name1'], 'p_id': p['id1'], 'n_name': np['name1'],
+                {'a_name': a_name, 'a_id': a_id, 'p_name': p_name, 'p_id': p_id, 'n_name': np['name1'],
                  'n_id': np['id1']})
             continue
 
-    remain = [p for p in pairs if not p['used1'] or not p['used2']]
-    remain_same = [p for p in pairs if p['same_person'] and not p['used1'] and not p['used2']]
-    remain_not_same = [p for p in pairs if not p['same_person'] and not p['used1'] and not p['used2']]
-    print('len(remain): ' + str(len(remain)))
+    remain_same = [p for p in pairs if p['same_person'] and p['name1'] not in used and p['name2'] not in used]
+    remain_not_same = [p for p in pairs if not p['same_person'] and p['name1'] not in used and p['name2'] not in used]
+
     print('len(remain_same): ' + str(len(remain_same)))
     print('len(remain_not_same): ' + str(len(remain_not_same)))
 
     for p in remain_same:
         a_name = p['name1']
         a_id = p['id1']
-        p_name = p['name1']
-        p_id = p['id1']
-        no_match = [np for np in remain_not_same if np['name1'] != a_name and not np['used2']]
-        if len(no_match) > 0:
-            np = no_match[0]
-            p['used1'] = True
-            p['used2'] = True
-            np['used1'] = True
+        p_name = p['name2']
+        p_id = p['id2']
+        no_match_1 = [np for np in remain_not_same if np['name1'] != a_name and np['name1'] not in used]
+        if len(no_match_1) > 0:
+            np = no_match_1[0]
+            used.add(a_name)
+            used.add(p_name)
+            used.add(np['name1'])
             triplets_raw.append(
                 {'a_name': a_name, 'a_id': a_id, 'p_name': p_name, 'p_id': p_id, 'n_name': np['name1'],
                  'n_id': np['id1']})
+            continue
+
+        no_match_2 = [np for np in remain_not_same if np['name2'] != a_name and np['name2'] not in used]
+        if len(no_match_2) > 0:
+            np = no_match_2[0]
+            used.add(a_name)
+            used.add(p_name)
+            used.add(np['name2'])
+            triplets_raw.append(
+                {'a_name': a_name, 'a_id': a_id, 'p_name': p_name, 'p_id': p_id, 'n_name': np['name2'],
+                 'n_id': np['id2']})
             continue
 
     triplets = []
